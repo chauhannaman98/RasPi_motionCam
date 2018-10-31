@@ -1,0 +1,27 @@
+from picamera import PiCamera
+from time import sleep
+camera = PiCamera()
+
+import RPi.GPIO as GPIO
+import time
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(11, GPIO.IN)         #Read output from PIR motion sensor
+GPIO.setup(3, GPIO.OUT)         #LED output pin
+while True:
+       i=GPIO.input(11)
+       if i==0:                 #When output from motion sensor is LOW
+             print 'No intruders',i
+             camera.resolution = (2592, 1944)
+	     camera.start_preview()
+	     for i in range(4):
+                 sleep(2)
+                 camera.capture('/home/pi/Desktop/image%s.jpg' % i)
+             camera.stop_preview()
+             GPIO.output(3, 0)  #Don't take a picture
+             time.sleep(0.1)
+       elif i==1:               #When output from motion sensor is HIGH
+             print "Intruder detected",i
+             GPIO.output(3, 1)  #Take a picture
+             time.sleep(0.1)
